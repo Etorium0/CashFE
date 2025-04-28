@@ -44,7 +44,7 @@ export default {
     fallback: true
   },
   head: {
-    title: 'Tornado.cash',
+    title: 'Cyclone_Protocol.cash',
     meta: [
       { charset: 'utf-8' },
       {
