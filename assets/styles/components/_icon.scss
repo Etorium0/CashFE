@@ -132,9 +132,9 @@
     transform: rotate(-180deg);
   }
 
-  // &-logo {
-  //   mask-image: url('../img/icons/cylone_protocol.svg');
-  // }
+  &-logo {
+    mask-image: url('../img/icons/logo.svg');
+  }
 
   &-loading {
     &.trnd-48px {
