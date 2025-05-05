@@ -1,13 +1,11 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Node.js CI/CD
+name: Node.js CI
 
 on:
   push:
-    branches: [master, main]
-  pull_request:
-    branches: [master, main]
+    branches: [master]
 
 jobs:
   cleanup:
@@ -24,10 +22,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
         with:
-          node-version: [18.x, 20.x]
+          node-version: 14
       - run: yarn install
       - name: Linting JS
         run: yarn lint
@@ -44,8 +42,8 @@ jobs:
           OLD_STORE_NAME: ${{ secrets.OLD_STORE_NAME }}
           STORE_NAME: ${{ secrets.STORE_NAME }}
           APP_ENS_NAME: ${{ secrets.APP_ENS_NAME }}
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload artefact
+        uses: actions/upload-artifact@v1.0.0
         with:
           name: dist
           path: dist
@@ -55,11 +53,11 @@ jobs:
     needs: build
     steps:
       - name: Download artifact `dist`
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v1
         with:
           name: dist
       - name: Add SSH key
-        uses: webfactory/ssh-agent@v0.5.3
+        uses: webfactory/ssh-agent@v0.2.0
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         with:
@@ -78,67 +76,67 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       - name: Download artifact `dist`
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v1
         with:
           name: dist
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v1.1.0
         with:
-          context: .
-          file: Dockerfile
-          push: true
-          tags: tornadocash/ui:latest
-          secrets:
-            DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-            DOCKER_PASSWORD: ${{ secrets.DOCKER_TOKEN }}
+          path: dist
+          dockerfile: Dockerfile
+          repository: tornadocash/ui
+          tags: latest
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
   deploy-ipfs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
         with:
-          node-version: 20
+          node-version: 14
       - run: yarn install
       - name: Download artifact `dist`
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v1
         with:
           name: dist
       - name: Upload to IPFS
         id: upload
-        run: yarn ipfsUpload
+        run: yarn ipfsUpload dist
         env:
           PINATA_API_KEY: ${{ secrets.PINATA_API_KEY }}
           PINATA_SECRET_API_KEY: ${{ secrets.PINATA_SECRET_API_KEY }}
 
-  # notify:
-  #   runs-on: ubuntu-latest
-  #   if: always()
-  #   needs:
-  #     - deploy-minified
-  #     - deploy-docker
-  #     - deploy-ipfs
-  #   steps:
-  #     - uses: technote-space/workflow-conclusion-action@v2
-  #     - name: Set short SHA
-  #       id: vars
-  #       run: echo "::set-output name=sha_short::$(echo ${GITHUB_SHA:0:7})"
-  #     - name: Telegram Success Notification
-  #       uses: appleboy/telegram-action@v0.1.1
-  #       if: ${{ env.WORKFLOW_CONCLUSION == 'success' }}
-  #       with:
-  #         to: ${{ secrets.TELEGRAM_CHAT_ID }}
-  #         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-  #         message: 🚀 Deployed commit [${{ steps.vars.outputs.sha_short }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) of Tornado Cash UI
-  #         format: markdown
-  #     - name: Telegram Failure Notification
-  #       uses: appleboy/telegram-action@v0.1.1
-  #       if: ${{ env.WORKFLOW_CONCLUSION != 'success' }}
-  #       with:
-  #         to: ${{ secrets.TELEGRAM_CHAT_ID }}
-  #         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-  #         message: ❗ Build failed for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions) because of ${{ github.actor }}
-  #         format: markdown
+  notify:
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - deploy-minified
+      - deploy-docker
+      - deploy-ipfs
+    steps:
+      # ${{ env.WORKFLOW_CONCLUSION }} # neutral, success, cancelled, timed_out, failure
+      - uses: technote-space/workflow-conclusion-action@v2
+      - name: Set short SHA
+        id: vars
+        run: echo "::set-output name=sha_short::$(echo ${GITHUB_SHA:0:7})"
+      - name: Telegram Message Notify
+        uses: appleboy/telegram-action@v0.1.1
+        if: ${{ env.WORKFLOW_CONCLUSION == 'success' }}
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN}}
+          message: 🚀 Deployed commit [${{ steps.vars.outputs.sha_short }}](https://github.com/tornadocash/tornado-cash-ui/commit/${{ github.sha }}) of tornado.cash UI
+          format: markdown
+      - name: Telegram Failure Notification
+        uses: appleboy/telegram-action@v0.1.1
+        if: ${{ env.WORKFLOW_CONCLUSION == 'failure' || env.WORKFLOW_CONCLUSION == 'timed_out' || env.WORKFLOW_CONCLUSION == 'neutral' }}
+        with:
+          message: ❗ Build failed for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions) because of ${{ github.actor }}
+          format: markdown
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
