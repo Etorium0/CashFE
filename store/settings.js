@@ -75,6 +75,7 @@ export const actions = {
     throw new Error(this.app.i18n.t('rpcSelectError'))
   },
   async checkRpc(_, { url, netId }) {
+    console.log('%c RPC CHECK:', 'background: #222; color: #bada55', { url, netId })
     try {
       const web3 = new Web3(url)
 

@@ -1,6 +1,6 @@
 <template>
   <div class="action">
-    <div class="action-item">
+    <!-- <div class="action-item">
       <b-icon icon="account-setup" size="is-large" />
       <div class="desc">
         {{ $t('account.setup.desc') }}
@@ -16,8 +16,8 @@
           {{ $t('account.setup.account') }}
         </b-button>
       </b-tooltip>
-    </div>
-    <div class="action-item">
+    </div> -->
+    <!-- <div class="action-item">
       <b-icon icon="account-recover" size="is-large" />
       <div class="desc">
         {{ $t('account.setup.recoverDesc') }}
@@ -33,8 +33,8 @@
           {{ $t('account.setup.recover') }}
         </b-button>
       </b-tooltip>
-    </div>
-    <div class="action-item">
+    </div> -->
+    <!-- <div class="action-item">
       <b-icon icon="account-raw" size="is-large" />
       <div class="desc">
         {{ $t('account.setup.enterRawDesc') }}
@@ -46,7 +46,7 @@
         @click="showRecoverKeyModal"
         >{{ $t('account.setup.enterRaw') }}</b-button
       >
-    </div>
+    </div> -->
   </div>
 </template>
 

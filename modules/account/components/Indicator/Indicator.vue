@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <b-tooltip position="is-bottom" type="is-dark-tooltip" :triggers="[]">
     <template v-slot:content>
       <template v-if="isSetupAccount">
@@ -13,17 +13,17 @@
     </template>
     <b-button type="is-nav-icon" icon-left="wallet" :class="{ tornado: isSetupAccount }"></b-button>
   </b-tooltip>
-</template>
+</template> -->
 
 <script>
 import { indicatorComputed, indicatorMethods } from '../../injectors'
-import { NumberFormat } from '../../dependencies'
+// import { NumberFormat } from '../../dependencies'
 import { sliceAddress } from '@/utils'
 
 export default {
-  components: {
-    NumberFormat
-  },
+  // components: {
+  //   NumberFormat
+  // },
   props: {
     active: {
       type: Boolean

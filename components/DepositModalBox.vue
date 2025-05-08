@@ -28,13 +28,13 @@
     <div v-show="isEnabledSaveFile" class="note">
       {{ $t('saveAsFile') }} <span class="has-text-primary">{{ filename }}</span>
     </div>
-    <template v-if="!isSetupAccount">
+    <!-- <template v-if="!isSetupAccount">
       <i18n tag="div" path="yourDontHaveAccount" class="notice">
         <template v-slot:account>
           <a @click="_redirectToAccount">{{ $t('account.button') }}</a>
         </template>
       </i18n>
-    </template>
+    </template> -->
     <b-checkbox v-if="isSetupAccount" v-model="isEncrypted">
       <i18n v-show="isSetupAccount" tag="div" path="iEncryptedTheNote">
         <template v-slot:address>

@@ -1,28 +1,7 @@
-<template>
-  <div ref="note" class="note-account" :class="{ 'is-active': isActive }">
-    <h2 class="title">
-      <!-- <b-icon icon="astronaut" size="is-large" /> -->
-      {{ $t('account.title') }}
-    </h2>
-    <b-notification class="main-notification" type="is-info">
-      {{ $t('account.description') }}
-    </b-notification>
-    <Setup v-if="!isSetupAccount" />
-    <Control v-else />
-  </div>
-</template>
-
 <script>
 import { noteComputed, noteMethods } from '../../injectors'
 
-import { Setup } from '../Setup'
-import { Control } from '../Control'
-
 export default {
-  components: {
-    Setup,
-    Control
-  },
   data() {
     return {
       isActive: false

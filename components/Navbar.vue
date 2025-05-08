@@ -6,7 +6,7 @@
       </b-navbar-item>
     </template>
     <template slot="start">
-      <b-navbar-item
+      <!-- <b-navbar-item
         v-if="isEnabledGovernance"
         tag="router-link"
         to="/governance"
@@ -15,11 +15,11 @@
         class="has-tag"
       >
         {{ $t('governance') }} <span v-if="hasActiveProposals" class="navbar-item--tag"></span>
-      </b-navbar-item>
-      <b-navbar-item tag="router-link" to="/compliance" data-test="compliance_link">
+      </b-navbar-item> -->
+      <!-- <b-navbar-item tag="router-link" to="/compliance" data-test="compliance_link">
         {{ $t('compliance') }}
-      </b-navbar-item>
-      <b-navbar-item
+      </b-navbar-item> -->
+      <!-- <b-navbar-item
         href="https://docs.tornado.cash"
         target="_blank"
         data-test="docs_link"
@@ -28,7 +28,7 @@
       >
         <b-icon icon="open-book" size="is-small" class="mr-1" />
         <span>{{ $t('docs') }}</span>
-      </b-navbar-item>
+      </b-navbar-item> -->
     </template>
     <template slot="end">
       <b-navbar-item tag="div">
