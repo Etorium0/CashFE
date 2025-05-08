@@ -4,7 +4,8 @@ const {
   ALCHEMY_POLYGON_KEY,
   ALCHEMY_OPTIMISM_KEY,
   ALCHEMY_ARBITRUM_KEY,
-  ALCHEMY_GOERLI_KEY
+  ALCHEMY_GOERLI_KEY,
+  ALCHEMY_RONIN_KEY
 } = process.env
 
 export default {
@@ -544,31 +545,31 @@ export default {
     'governance.contract.tornadocash.eth': '0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce',
     'tornado-proxy.contract.tornadocash.eth': '0x454d870a72e29d5e5697f635128d18077bd04c60'
   },
-  netId2020: {
+  netId2021: {
     rpcCallRetryAttempt: 15,
     gasPrices: {
-      instant: 1,
-      fast: 1,
-      standard: 1,
-      low: 1
+      instant: 100,
+      fast: 75,
+      standard: 50,
+      low: 30
     },
     nativeCurrency: 'ron',
     currencyName: 'RON',
     explorerUrl: {
-      tx: 'https://explorer.roninchain.com/tx/',
-      address: 'https://explorer.roninchain.com/address/',
-      block: 'https://explorer.roninchain.com/block/'
+      tx: 'https://saigon-app.roninchain.com/tx/',
+      address: 'https://saigon-app.roninchain.com/address/',
+      block: 'https://saigon-app.roninchain.com/block/'
     },
     merkleTreeHeight: 20,
     emptyElement: '21663839004416932945382355908790599225266501822907911457504978515578255421292',
     networkName: 'Ronin',
-    deployedBlock: 0, // Replace with actual deployed block when available
+    deployedBlock: 37511374, // Replace with actual deployed block when available
     multicall: '0xYourMulticallContractAddressHere', // Replace with actual multicall address
     echoContractAccount: '0xYourEchoContractAccountAddressHere', // Replace with actual echo contract address
     rpcUrls: {
-      publicRpc: {
-        name: 'Ronin RPC',
-        url: 'https://api.roninchain.com/rpc'
+      Alchemy: {
+        name: 'Alchemy',
+        url: `https://ronin-saigon.g.alchemy.com/v2/${ALCHEMY_RONIN_KEY}`
       }
     },
     tokens: {
@@ -589,6 +590,6 @@ export default {
       NOTE_ACCOUNT_BLOCK: 0, // Replace with actual block number
       ENCRYPTED_NOTES_BLOCK: 0 // Replace with actual block number
     },
-    'tornado-proxy-light.contract.tornadocash.eth': '0xYourTornadoProxyLightAddressHere' // Replace with actual address
+    'tornado-proxy-light.contract.tornadocash.eth': '0xC8a875dBd9536f49F64898C27A9BA3FFcEaFF050' // Replace with actual address
   }
 }

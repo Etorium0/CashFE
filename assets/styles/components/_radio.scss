@@ -1,6 +1,6 @@
 .b-radio {
   &.radio {
-    input[type=radio] {
+    input[type='radio'] {
       + .check {
         border-color: $primary;
       }
@@ -8,7 +8,7 @@
       &:checked {
         + .check {
           &:before {
-            transform: scale(.6);
+            transform: scale(0.6);
           }
         }
       }
@@ -24,7 +24,7 @@
       color: $white;
 
       .button {
-        margin-left: .45rem;
+        margin-left: 0.45rem;
       }
     }
   }

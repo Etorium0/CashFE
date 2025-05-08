@@ -1,5 +1,5 @@
 .withdraw-data {
-  font-size: .85rem;
+  font-size: 0.85rem;
   width: 100%;
   line-height: 1;
 
@@ -10,7 +10,7 @@
   }
 
   &.is-spaced {
-    margin-top: -.75rem;
+    margin-top: -0.75rem;
 
     &:not(:last-child) {
       margin-bottom: 1.25rem;
@@ -27,7 +27,7 @@
 
     span {
       color: $primary;
-      margin-left: .5rem;
+      margin-left: 0.5rem;
       text-align: right;
 
       > span {
@@ -71,7 +71,7 @@
     }
 
     + .withdraw-data-item {
-      margin-top: .6rem;
+      margin-top: 0.6rem;
     }
   }
 }

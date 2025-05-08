@@ -27,7 +27,7 @@ fieldset[disabled] {
       color: #eee;
     }
 
-    &:not([data-label=""]):after {
+    &:not([data-label='']):after {
       transition-delay: inherit;
       opacity: 1;
       visibility: visible;
@@ -52,14 +52,14 @@ fieldset[disabled] {
   .b-radio {
     &.radio {
       &:focus {
-        input[type=radio] {
+        input[type='radio'] {
           + .check {
             box-shadow: none;
           }
         }
       }
 
-      input[type=radio] {
+      input[type='radio'] {
         + .check {
           cursor: not-allowed;
         }

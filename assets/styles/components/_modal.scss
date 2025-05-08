@@ -8,24 +8,24 @@
   @include desktop {
     @media screen and (max-height: 720px - 1px) {
       .dropdown {
-          .background {
-            display: block;
-          }
+        .background {
+          display: block;
+        }
 
-          .dropdown-menu {
-              position: fixed;
-              width: calc(100vw - 40px);
-              max-width: 460px;
-              max-height: calc(100vh - 120px);
-              top: 25% !important;
-              left: 50% !important;
-              bottom: auto !important;
-              right: auto !important;
-              transform: translate3d(-50%, -25%, 0);
-              white-space: normal;
-              overflow-y: auto;
-              z-index: 50;
-          }
+        .dropdown-menu {
+          position: fixed;
+          width: calc(100vw - 40px);
+          max-width: 460px;
+          max-height: calc(100vh - 120px);
+          top: 25% !important;
+          left: 50% !important;
+          bottom: auto !important;
+          right: auto !important;
+          transform: translate3d(-50%, -25%, 0);
+          white-space: normal;
+          overflow-y: auto;
+          z-index: 50;
+        }
       }
     }
 

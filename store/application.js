@@ -132,7 +132,11 @@ const getters = {
       'tornado-router.contract.tornadocash.eth': tornadoRouter,
       'tornado-proxy-light.contract.tornadocash.eth': tornadoProxyLight
     } = networkConfig[`netId${netId}`]
-
+    console.log('tornadoProxyContract', {
+      tornadoRouter,
+      tornadoProxy,
+      tornadoProxyLight
+    })
     const proxyContract = tornadoRouter || tornadoProxy || tornadoProxyLight
     const { url } = rootState.settings[`netId${netId}`].rpc
     const web3 = new Web3(url)
@@ -545,39 +549,86 @@ const actions = {
   },
   async sendDeposit({ state, rootState, getters, rootGetters, dispatch, commit }, { isEncrypted }) {
     try {
+      console.log('Starting deposit process...', { isEncrypted })
       const { commitment, note, prefix } = state
+      console.log('Deposit data:', { commitment, note: note.substring(0, 10) + '...', prefix })
+
       // eslint-disable-next-line prefer-const
       let [, currency, amount, netId] = prefix.split('-')
+      console.log('Parsed prefix:', { currency, amount, netId })
+
       const config = networkConfig[`netId${netId}`]
       const contractInstance = getters.tornadoProxyContract({ netId })
+      console.log('Contract address:', contractInstance._address)
+      console.log('Contract instance:', contractInstance)
 
       if (!state.commitment) {
         throw new Error(this.app.i18n.t('failToGenerateNote'))
       }
 
       const { nextDepositIndex: index } = await dispatch('getLastDepositIndex', { netId, currency, amount })
+      console.log('Current deposit index:', index)
 
       const { ethAccount } = rootState.metamask
       const nativeCurrency = rootGetters['metamask/nativeCurrency']
       const isNative = currency === nativeCurrency
+      console.log('Transaction details:', {
+        from: ethAccount,
+        isNativeCurrency: isNative,
+        nativeCurrency
+      })
 
       const value = isNative ? toWei(amount, 'ether') : '0'
       const instance = config.tokens[currency].instanceAddress[amount]
+      console.log('Instance details:', { instance, value })
 
       let params = [instance, commitment, []]
+      console.log('Initial deposit params:', params)
 
       if (isEncrypted) {
+        console.log('Preparing encrypted note...')
         const encryptedNote = await dispatch(
           'encryptedNote/getEncryptedNote',
           { data: `${instance}-${note}` },
           { root: true }
         )
-
+        console.log('Encrypted note received, length:', encryptedNote.length)
         params = [instance, commitment, encryptedNote]
       }
+      console.log('isEncrypted', isEncrypted)
+      // console.log('Final deposit params:', [
+      //   params[0],
+      //   params[1],
+      //   params[2] ? `${params[2].substring(0, 10)}...` : []
+      // ])
+      console.log('params', params)
 
       const data = contractInstance.methods.deposit(...params).encodeABI()
-      const gas = await contractInstance.methods.deposit(...params).estimateGas({ from: ethAccount, value })
+      console.log('Encoded transaction data (first 20 chars):', data.substring(0, 20) + '...')
+
+      // Simplify gas estimation with better error handling
+      console.log('Starting gas estimation...')
+      let gas
+      try {
+        // Wrap in Promise.resolve to ensure we can catch any synchronous errors too
+        gas = await Promise.resolve().then(() => {
+          return contractInstance.methods.deposit(...params).estimateGas({ from: ethAccount, value })
+        })
+        console.log('Gas estimation successful:', gas)
+      } catch (err) {
+        console.error('Gas estimation failed with error:', err)
+        console.error('Error details:', {
+          message: err.message,
+          code: err.code,
+          reason: err.reason,
+          stack: err.stack
+        })
+
+        // Try with higher gas limit as fallback
+        console.log('Attempting fallback with fixed gas limit...')
+        gas = 300000
+        console.log('Using fallback gas value:', gas)
+      }
 
       const callParams = {
         method: 'eth_sendTransaction',
@@ -599,12 +650,26 @@ const actions = {
         isAwait: false
       }
 
+      console.log('Sending transaction with params:', {
+        to: contractInstance._address,
+        gas: gas + 50000,
+        value: isNative ? `${amount} ${currency}` : '0',
+        dataSize: data.length
+      })
+
       const txHash = await dispatch('metamask/sendTransaction', callParams, { root: true })
+      console.log('Transaction sent! Hash:', txHash)
 
       // there may be a race condition, you need to request an index and a timestamp of the deposit after tx is mined
       const timestamp = Math.round(new Date().getTime() / 1000)
+      console.log('Recording timestamp:', timestamp)
 
       const { nullifierHex, commitmentHex } = parseHexNote(state.note)
+      console.log('Parsed note:', {
+        nullifierHex: nullifierHex.substring(0, 10) + '...',
+        commitmentHex: commitmentHex.substring(0, 10) + '...'
+      })
+
       const storeType = isEncrypted ? 'encryptedTxs' : 'txs'
 
       const accounts = rootGetters['encryptedNote/accounts']
@@ -623,17 +688,22 @@ const actions = {
         commitmentHex,
         currency
       }
-      console.log('tx', tx)
+      console.log('Saving transaction to store:', { ...tx, note: tx.note.substring(0, 10) + '...' })
 
       if (isEncrypted) {
         tx.note = params[2]
         tx.owner = isAddress(accounts.encrypt) ? accounts.encrypt : ''
         tx.backupAccount = isAddress(accounts.backup) ? accounts.backup : ''
+        console.log('Added encryption details:', {
+          owner: tx.owner ? tx.owner.substring(0, 10) + '...' : 'none',
+          backupAccount: tx.backupAccount ? tx.backupAccount.substring(0, 10) + '...' : 'none'
+        })
       }
 
       commit('txHashKeeper/SAVE_TX_HASH', tx, { root: true })
+      console.log('Deposit transaction completed successfully!')
     } catch (e) {
-      console.error('sendDeposit', e)
+      console.error('sendDeposit error:', e)
       return false
     }
   },
