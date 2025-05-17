@@ -36,6 +36,11 @@
           <network-navbar-icon />
           <metamask-navbar-icon data-test="metamask_connection_state" />
           <indicator data-test="note_account_connection_state" />
+          <!-- Nút KYC mới -->
+          <b-button icon-left="user" type="is-primary" outlined @click="showKyc = true">
+            KYC
+          </b-button>
+          <!-- Nút Settings giữ nguyên -->
           <b-button
             icon-left="settings"
             type="is-primary"
@@ -47,6 +52,8 @@
             {{ $t('settings') }}
           </b-button>
         </div>
+        <!-- Modal KYC -->
+        <KycModal :visible.sync="showKyc" @kyc-submitted="onKycSubmitted" />
       </b-navbar-item>
     </template>
   </b-navbar>
@@ -58,17 +65,20 @@ import Logo from '@/components/Logo'
 import { Indicator } from '@/modules/account'
 import MetamaskNavbarIcon from '@/components/MetamaskNavbarIcon'
 import NetworkNavbarIcon from '@/components/NetworkNavbarIcon'
+import KycModal from '@/components/KycModal.vue'
 
 export default {
   components: {
     Logo,
     Indicator,
     NetworkNavbarIcon,
-    MetamaskNavbarIcon
+    MetamaskNavbarIcon,
+    KycModal
   },
   data() {
     return {
-      isActive: false
+      isActive: false,
+      showKyc: false
     }
   },
   computed: {
@@ -79,6 +89,11 @@ export default {
   methods: {
     onAccount() {
       this.$router.push('/account')
+    },
+    onKycSubmitted(data) {
+      this.$buefy.toast.open({ message: 'KYC submitted and signed!', type: 'is-success' })
+      // Xử lý dữ liệu KYC tại đây nếu cần
+      console.log('KYC data:', data)
     }
   }
 }
