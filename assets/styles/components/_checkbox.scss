@@ -1,6 +1,6 @@
 .b-checkbox {
   &.checkbox {
-    input[type=checkbox] {
+    input[type='checkbox'] {
       + .check {
         border-radius: 2px;
         border: 1px solid $primary;
@@ -13,12 +13,12 @@
           display: flex;
           position: absolute;
           left: 50%;
-          margin-left: calc(-1.5rem/2);
+          margin-left: calc(-1.5rem / 2);
           bottom: 50%;
-          margin-bottom: calc(-1.5rem/2);
+          margin-bottom: calc(-1.5rem / 2);
           width: 1.5rem;
           height: 1.5rem;
-          transition: transform .15s ease-out;
+          transition: transform 0.15s ease-out;
           transform: scale(0);
           background-color: $primary;
           border-radius: 1px;
@@ -28,7 +28,7 @@
         background: none;
 
         &:before {
-          transform: scale(.4);
+          transform: scale(0.4);
         }
       }
     }

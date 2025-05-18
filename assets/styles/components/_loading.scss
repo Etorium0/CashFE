@@ -1,7 +1,7 @@
 .loading-overlay {
   &.is-full-page {
     .loading-background {
-      background:rgba(0,0,0,0.85);
+      background: rgba(0, 0, 0, 0.85);
     }
   }
   .loading-container {
@@ -23,12 +23,12 @@
     }
 
     .loading-message {
-      padding-top: .5rem;
+      padding-top: 0.5rem;
       color: $primary;
       text-align: center;
 
       + .button {
-        margin-top: .5rem;
+        margin-top: 0.5rem;
       }
     }
     .loading-alert {
@@ -49,7 +49,9 @@
 
 @keyframes spinAroundReverse {
   from {
-    transform: rotate(359deg); }
+    transform: rotate(359deg);
+  }
   to {
-    transform: rotate(0deg); }
+    transform: rotate(0deg);
+  }
 }

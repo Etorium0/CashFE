@@ -3,19 +3,14 @@ import Web3 from 'web3'
 import Jszip from 'jszip'
 import axios from 'axios'
 import ENS, { getEnsAddress } from '@ensdomains/ensjs'
-
-import { detectMob } from '@/utils'
 import networkConfig from '@/networkConfig'
 
 const { APP_ENS_NAME } = process.env
 
-const groth16 = require('websnark/src/groth16')
 const jszip = new Jszip()
 
 function buildGroth16() {
-  const isMobile = detectMob()
-  const wasmMemory = isMobile ? 1000 : 2000
-  return groth16({ wasmInitialMemory: wasmMemory })
+  return 'nothing'
 }
 
 function getEns() {

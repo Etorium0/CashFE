@@ -4,10 +4,58 @@ const {
   ALCHEMY_POLYGON_KEY,
   ALCHEMY_OPTIMISM_KEY,
   ALCHEMY_ARBITRUM_KEY,
-  ALCHEMY_GOERLI_KEY
+  ALCHEMY_GOERLI_KEY,
+  ALCHEMY_RONIN_KEY
 } = process.env
 
 export default {
+  netId2021: {
+    rpcCallRetryAttempt: 15,
+    gasPrices: {
+      instant: 100,
+      fast: 75,
+      standard: 50,
+      low: 30
+    },
+    nativeCurrency: 'ron',
+    currencyName: 'RON',
+    explorerUrl: {
+      tx: 'https://saigon-app.roninchain.com/tx/',
+      address: 'https://saigon-app.roninchain.com/address/',
+      block: 'https://saigon-app.roninchain.com/block/'
+    },
+    merkleTreeHeight: 20,
+    emptyElement: '21663839004416932945382355908790599225266501822907911457504978515578255421292',
+    networkName: 'Ronin',
+    deployedBlock: 37511370, // Replace with actual deployed block when available
+    multicall: '0xYourMulticallContractAddressHere', // Replace with actual multicall address
+    echoContractAccount: '0xYourEchoContractAccountAddressHere', // Replace with actual echo contract address
+    rpcUrls: {
+      Alchemy: {
+        name: 'Alchemy',
+        url: `https://ronin-saigon.g.alchemy.com/v2/${ALCHEMY_RONIN_KEY}`
+      }
+    },
+    tokens: {
+      ron: {
+        instanceAddress: {
+          '0.1': '0xEbEF345604e9DE5881Eb5B35E72105F22198B2BE',
+          '1': '0x8EF1Fde959E1Ab801d3fe224b31da2372B16403A',
+          '10': '0x63c8ebc6344D45b42D42B9549bF17bD205e3D9D6',
+          '100': '0x709F79a24d1Bb15382fc979d2De00B6C76bDc847'
+        },
+        symbol: 'RON',
+        decimals: 18
+      }
+    },
+    ensSubdomainKey: 'ronin-tornado',
+    pollInterval: 10,
+    constants: {
+      NOTE_ACCOUNT_BLOCK: 0, // Replace with actual block number
+      ENCRYPTED_NOTES_BLOCK: 0 // Replace with actual block number
+    },
+    'tornado-proxy-light.contract.tornadocash.eth': '0xC8a875dBd9536f49F64898C27A9BA3FFcEaFF050' // Replace with actual address
+  },
   netId1: {
     rpcCallRetryAttempt: 15,
     gasPrices: {
@@ -543,52 +591,5 @@ export default {
     'torn.contract.tornadocash.eth': '0x77777FeDdddFfC19Ff86DB637967013e6C6A116C',
     'governance.contract.tornadocash.eth': '0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce',
     'tornado-proxy.contract.tornadocash.eth': '0x454d870a72e29d5e5697f635128d18077bd04c60'
-  },
-  netId2020: {
-    rpcCallRetryAttempt: 15,
-    gasPrices: {
-      instant: 1,
-      fast: 1,
-      standard: 1,
-      low: 1
-    },
-    nativeCurrency: 'ron',
-    currencyName: 'RON',
-    explorerUrl: {
-      tx: 'https://explorer.roninchain.com/tx/',
-      address: 'https://explorer.roninchain.com/address/',
-      block: 'https://explorer.roninchain.com/block/'
-    },
-    merkleTreeHeight: 20,
-    emptyElement: '21663839004416932945382355908790599225266501822907911457504978515578255421292',
-    networkName: 'Ronin',
-    deployedBlock: 0, // Replace with actual deployed block when available
-    multicall: '0xYourMulticallContractAddressHere', // Replace with actual multicall address
-    echoContractAccount: '0xYourEchoContractAccountAddressHere', // Replace with actual echo contract address
-    rpcUrls: {
-      publicRpc: {
-        name: 'Ronin RPC',
-        url: 'https://api.roninchain.com/rpc'
-      }
-    },
-    tokens: {
-      ron: {
-        instanceAddress: {
-          '0.1': '0xf91325BEEE5742a988e456eF3F6f8789c3814Ae6',
-          '1': '0x9d5AA29256B8A35bdC9745F69d157463E367e1Fa',
-          '10': '0xabEa48edad9AAB60CFa0256bc25511B300750bC5',
-          '100': '0x3cC2Fe72962f813564010566596c193aB32549Ae'
-        },
-        symbol: 'RON',
-        decimals: 18
-      }
-    },
-    ensSubdomainKey: 'ronin-tornado',
-    pollInterval: 10,
-    constants: {
-      NOTE_ACCOUNT_BLOCK: 0, // Replace with actual block number
-      ENCRYPTED_NOTES_BLOCK: 0 // Replace with actual block number
-    },
-    'tornado-proxy-light.contract.tornadocash.eth': '0xYourTornadoProxyLightAddressHere' // Replace with actual address
   }
 }

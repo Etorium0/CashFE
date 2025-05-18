@@ -2,25 +2,23 @@ import { eventsType } from '@/constants'
 
 export function formatEvents(events, type) {
   if (type === eventsType.DEPOSIT) {
-    return events.map(({ blockNumber, transactionHash, returnValues }) => {
-      const { commitment, leafIndex, timestamp } = returnValues
+    return events.map((event) => {
       return {
-        blockNumber,
-        transactionHash,
-        commitment,
-        leafIndex: Number(leafIndex),
-        timestamp
+        blockNumber: event.blockNumber ? event.blockNumber : event.BlockNumber,
+        transactionHash: event.transactionHash ? event.transactionHash : event.TxHash,
+        commitment: event.commitment ? event.commitment : event.Commitments,
+        leafIndex: Number(event.index ? event.index : event.LeafIndex),
+        timestamp: event.timestamp ? event.timestamp : event.Timestamp
       }
     })
   } else {
-    return events.map(({ blockNumber, transactionHash, returnValues }) => {
-      const { nullifierHash, to, fee } = returnValues
+    return events.map((event) => {
       return {
-        blockNumber,
-        transactionHash,
-        nullifierHash,
-        to,
-        fee
+        blockNumber: event.blockNumber ? event.blockNumber : event.BlockNumber,
+        transactionHash: event.transactionHash ? event.transactionHash : event.TxHash,
+        nullifierHash: event.nullifier ? event.nullifier : event.NullifierHash,
+        to: event.to ? event.to : event.Recipient,
+        fee: event.fee ? event.fee : event.Fee
       }
     })
   }
@@ -29,19 +27,19 @@ export function formatEvents(events, type) {
 export function formatEvent(event, type) {
   if (type === eventsType.DEPOSIT) {
     return {
-      timestamp: event.timestamp,
-      commitment: event.commitment,
-      leafIndex: Number(event.index ? event.index : event.leafIndex),
-      blockNumber: event.blockNumber,
-      transactionHash: event.transactionHash
+      timestamp: event.timestamp ? event.timestamp : event.Timestamp,
+      commitment: event.commitment ? event.commitment : event.Commitments,
+      leafIndex: Number(event.index ? event.index : event.LeafIndex),
+      blockNumber: event.blockNumber ? event.blockNumber : event.BlockNumber,
+      transactionHash: event.transactionHash ? event.transactionHash : event.TxHash
     }
   } else {
     return {
-      to: event.to,
-      fee: event.fee,
-      nullifierHash: event.nullifier ? event.nullifier : event.nullifierHash,
-      blockNumber: Number(event.blockNumber),
-      transactionHash: event.transactionHash
+      to: event.to ? event.to : event.Recipient,
+      fee: event.fee ? event.fee : event.Fee,
+      nullifierHash: event.nullifier ? event.nullifier : event.NullifierHash,
+      blockNumber: Number(event.blockNumber ? event.blockNumber : event.BlockNumber),
+      transactionHash: event.transactionHash ? event.transactionHash : event.TxHash
     }
   }
 }

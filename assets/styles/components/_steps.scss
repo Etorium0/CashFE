@@ -17,7 +17,7 @@
         }
 
         .step-link {
-          transition: color .15s ease-in-out;
+          transition: color 0.15s ease-in-out;
 
           &:not(.is-clickable) {
             color: #393939;
@@ -36,13 +36,13 @@
           position: relative;
 
           &:before {
-            content: "";
+            content: '';
             display: flex;
             position: absolute;
             left: 50%;
-            margin-left: calc(-1.5rem/2);
+            margin-left: calc(-1.5rem / 2);
             bottom: 50%;
-            margin-bottom: calc(-1.5rem/2);
+            margin-bottom: calc(-1.5rem / 2);
             width: 1.5rem;
             height: 1.5rem;
             transition: transform 150ms ease-out;
@@ -63,11 +63,11 @@
               display: block;
               position: absolute;
               background-color: $primary;
-              height: .2em;
+              height: 0.2em;
               width: 100%;
               left: -50%;
               bottom: 0;
-              top: .7rem;
+              top: 0.7rem;
             }
 
             &:not(.is-clickable) {
@@ -78,17 +78,18 @@
           }
         }
 
-        &:first-child, &:last-child {
+        &:first-child,
+        &:last-child {
           .step-link {
             &::after {
               content: '';
               display: block;
               position: absolute;
               background: $primary;
-              height: .2em;
+              height: 0.2em;
               width: 50%;
               bottom: 0;
-              top: .7rem;
+              top: 0.7rem;
             }
 
             &:not(.is-clickable) {
@@ -137,7 +138,8 @@
           display: block;
         }
 
-        &::before, &::after {
+        &::before,
+        &::after {
           content: none;
         }
       }

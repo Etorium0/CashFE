@@ -1,12 +1,13 @@
 .tab-with-corner {
   border: 1px solid #393939;
   display: inline-flex;
-  padding: 0.68rem .625rem;
+  padding: 0.68rem 0.625rem;
   position: relative;
   z-index: 1;
   background-color: $primary-invert;
 
-  &:before, &:after {
+  &:before,
+  &:after {
     position: absolute;
     border: 1px solid #393939;
     transform-origin: bottom left;
@@ -18,11 +19,11 @@
   }
 
   span.is-small {
-    font-size: .7rem;
+    font-size: 0.7rem;
     line-height: 2.9;
 
     @include until(375px) {
-      font-size: .6rem;
+      font-size: 0.6rem;
       line-height: 2.8;
     }
   }
@@ -36,7 +37,7 @@
 
     @include until(375px) {
       padding-left: 1.5rem;
-      padding-right: .75rem;
+      padding-right: 0.75rem;
     }
 
     &:after {
@@ -59,7 +60,7 @@
 
     @include until(375px) {
       padding-right: 1.5rem;
-      padding-left: .75rem;
+      padding-left: 0.75rem;
     }
 
     &:before {
@@ -72,7 +73,7 @@
       bottom: -1px;
 
       @include until(375px) {
-        left: -.5rem;
+        left: -0.5rem;
       }
     }
   }
@@ -86,7 +87,7 @@
 
     @include until(375px) {
       padding-left: 1.5rem;
-      padding-right: .75rem;
+      padding-right: 0.75rem;
     }
 
     &:after {
@@ -99,7 +100,7 @@
       top: -1px;
 
       @include until(375px) {
-        right: -.5rem;
+        right: -0.5rem;
       }
     }
   }
@@ -107,7 +108,8 @@
   &.is-primary {
     border-color: $primary;
 
-    &:before, &:after {
+    &:before,
+    &:after {
       border-color: $primary;
     }
   }

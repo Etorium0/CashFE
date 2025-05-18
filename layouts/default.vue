@@ -14,7 +14,7 @@
     </section>
     <Footer />
     <Loader />
-    <Notices />
+
     <v-idle
       v-if="isSetupAccount && !isOpen"
       v-show="false"
@@ -33,7 +33,6 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Loader from '@/components/Loaders/Loader'
 import Settings from '@/components/Settings'
-import Notices from '@/components/Notices'
 import { openConfirmModal } from '@/modules/account'
 import NetworkModal from '@/components/NetworkModal'
 
@@ -42,8 +41,7 @@ export default {
   components: {
     Navbar,
     Footer,
-    Loader,
-    Notices
+    Loader
   },
   data() {
     return {

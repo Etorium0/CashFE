@@ -2,6 +2,10 @@ export function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
 
+export const lowercaseFirstLetter = (string) => {
+  return string.charAt(0).toLowerCase() + string.slice(1)
+}
+
 export const hashRender = (hash, size = 4, separator = '...') => {
   return hash.slice(0, size) + separator + hash.slice(-size)
 }
