@@ -171,9 +171,6 @@ export default {
    ** Build configuration
    */
   build: {
-    /*
-     ** You can extend webpack config here
-     */
     extend(config, ctx) {
       if (ctx.isClient) {
         config.devtool = hasSourceMaps
@@ -181,6 +178,34 @@ export default {
       config.module.rules.push({
         test: /\.bin$/,
         use: 'arraybuffer-loader'
+      })
+      config.node = {
+        fs: 'empty',
+        readline: 'empty'
+      }
+
+      // Update the babel-loader configuration
+      config.module.rules.push({
+        test: /\.m?js$/,
+        include: [/node_modules\/snarkjs/, /node_modules\/@iden3/, /node_modules\/ffjavascript/],
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              [
+                '@babel/preset-env',
+                {
+                  targets: 'defaults',
+                  loose: true
+                }
+              ]
+            ],
+            plugins: [
+              '@babel/plugin-proposal-optional-chaining',
+              '@babel/plugin-proposal-nullish-coalescing-operator'
+            ]
+          }
+        }
       })
     },
     plugins: [
@@ -196,7 +221,8 @@ export default {
           WC_BRIDGE: process.env.WC_BRIDGE,
           OLD_STORE_NAME: process.env.OLD_STORE_NAME,
           STORE_NAME: process.env.STORE_NAME,
-          APP_ENS_NAME: process.env.APP_ENS_NAME
+          APP_ENS_NAME: process.env.APP_ENS_NAME,
+          URL: process.env.URL
         })
       })
     ],

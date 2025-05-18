@@ -27,7 +27,7 @@ export default {
     merkleTreeHeight: 20,
     emptyElement: '21663839004416932945382355908790599225266501822907911457504978515578255421292',
     networkName: 'Ronin',
-    deployedBlock: 37511374, // Replace with actual deployed block when available
+    deployedBlock: 37511370, // Replace with actual deployed block when available
     multicall: '0xYourMulticallContractAddressHere', // Replace with actual multicall address
     echoContractAccount: '0xYourEchoContractAccountAddressHere', // Replace with actual echo contract address
     rpcUrls: {
@@ -39,10 +39,10 @@ export default {
     tokens: {
       ron: {
         instanceAddress: {
-          '0.1': '0xf91325BEEE5742a988e456eF3F6f8789c3814Ae6',
-          '1': '0x9d5AA29256B8A35bdC9745F69d157463E367e1Fa',
-          '10': '0xabEa48edad9AAB60CFa0256bc25511B300750bC5',
-          '100': '0x3cC2Fe72962f813564010566596c193aB32549Ae'
+          '0.1': '0xEbEF345604e9DE5881Eb5B35E72105F22198B2BE',
+          '1': '0x8EF1Fde959E1Ab801d3fe224b31da2372B16403A',
+          '10': '0x63c8ebc6344D45b42D42B9549bF17bD205e3D9D6',
+          '100': '0x709F79a24d1Bb15382fc979d2De00B6C76bDc847'
         },
         symbol: 'RON',
         decimals: 18

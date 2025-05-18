@@ -1,15 +1,16 @@
 import Web3 from 'web3'
-
+import axios from 'axios'
 import { graph } from '@/services'
 import { download } from '@/store/snark'
 import networkConfig from '@/networkConfig'
 import InstanceABI from '@/abis/Instance.abi.json'
 import { CONTRACT_INSTANCES, eventsType } from '@/constants'
-import { sleep, formatEvents, capitalizeFirstLetter } from '@/utils'
+import { sleep, formatEvents, formatEvent, capitalizeFirstLetter } from '@/utils'
 
 class EventService {
   constructor({ netId, amount, currency, factoryMethods }) {
     this.idb = window.$nuxt.$indexedDB(netId)
+    this.baseUrl = process.env.URL
 
     const { nativeCurrency } = networkConfig[`netId${netId}`]
 
@@ -68,6 +69,7 @@ class EventService {
       lastBlock
     }
   }
+
   async findEvent({ eventName, eventToFind, type }) {
     const instanceName = this.getInstanceName(type)
 
@@ -77,8 +79,24 @@ class EventService {
       key: eventToFind
     })
 
+    const url = `${this.baseUrl}/event/${type}/${eventToFind}`
+    console.log(`Getting ${type} with hex ${eventToFind} from indexer`, url)
+    const response = await axios.get(url, {
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      withCredentials: false // Disable sending credentials
+    })
+    console.log('find event api response', response.data)
+    if (response.data && response.data.event) {
+      event = formatEvent(response.data.event, type)
+    }
+
     if (event) {
       return event
+    } else {
+      console.log('event not found from idb')
     }
 
     const savedEvents = await this.getEvents(type)
@@ -113,6 +131,11 @@ class EventService {
         contentType: 'string',
         name: `events/${instanceName}.json.zip`
       })
+      if (module) {
+        console.log('module', module)
+      } else {
+        console.log('module not found')
+      }
 
       if (module) {
         const events = JSON.parse(module)
@@ -157,8 +180,17 @@ class EventService {
     }
   }
 
-  async getStatisticsRpc({ eventsCount }) {
+  async getStatisticsRpc({ eventsCount, type }) {
     const { deployedBlock } = networkConfig[`netId${this.netId}`]
+
+    const indexerEvents = await this.getLatestEventsFromIndexer({
+      eventsCount,
+      type
+    })
+    if (indexerEvents.events.length) {
+      return indexerEvents.events
+    }
+
     const savedEvents = await this.getEvents(eventsType.DEPOSIT)
 
     if (savedEvents.events.length) {
@@ -233,20 +265,44 @@ class EventService {
   }
 
   async getEventsPartFromRpc({ fromBlock, toBlock, type }) {
+    console.log('getting events part from rpc')
     try {
       const { currentBlockNumber } = await this.getBlocksDiff({ fromBlock })
-
       if (fromBlock > currentBlockNumber) {
         return {
           events: [],
           lastBlock: fromBlock
         }
       }
+      let events
+      console.log('this.netId', this.netId)
+      if (this.netId !== 0) {
+        events = await this.contract.getPastEvents(capitalizeFirstLetter(type), {
+          fromBlock,
+          toBlock
+        })
+      } else {
+        const blockRange = 450
+        let from = 37783281
+        const to = from + 499
+        let allEvents = []
+        while (from <= to) {
+          const minTo = Math.min(from, to)
+          console.log('from', from)
+          console.log('to', minTo)
+          const partEvents = await this.contract.getPastEvents(capitalizeFirstLetter(type), {
+            fromBlock: from,
+            toBlock: minTo
+          })
+          if (partEvents && partEvents.length > 0) {
+            allEvents = allEvents.concat(partEvents)
+          }
+          from = from + blockRange
+        }
+        events = allEvents
+      }
 
-      const events = await this.contract.getPastEvents(capitalizeFirstLetter(type), {
-        fromBlock,
-        toBlock
-      })
+      console.log('events get from rpc', JSON.stringify(formatEvents(events, type)))
 
       if (!events?.length) {
         return {
@@ -326,6 +382,14 @@ class EventService {
   async getEventsFromBlock({ fromBlock, graphMethod, type }) {
     try {
       // ToDo think about undefined
+      const indexerEvents = await this.getEventsFromEventIndexer({ fromBlock, type })
+      if (indexerEvents) {
+        return {
+          events: indexerEvents.events,
+          lastBlock: indexerEvents.lastBlock
+        }
+      }
+
       const graphEvents = await this.getEventsFromGraph({ fromBlock, methodName: graphMethod })
       const lastSyncBlock = fromBlock > graphEvents?.lastBlock ? fromBlock : graphEvents?.lastBlock
       const rpcEvents = await this.getEventsFromRpc({ fromBlock: lastSyncBlock, type })
@@ -339,6 +403,83 @@ class EventService {
       }
       return undefined
     } catch (err) {
+      return undefined
+    }
+  }
+
+  // TODO: find event from indexer
+  async findEventFromIndexer({ eventName, eventToFind, type }) {}
+
+  async getLatestEventsFromIndexer({ eventsCount, type }) {
+    const url = `${this.baseUrl}/events/${this.netId}/${this.contract._address}/${type}?limit=${eventsCount}`
+    console.log(`Getting ${eventsCount} events from indexer`, url)
+    let response
+    try {
+      response = await axios.get(url, {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        withCredentials: false // Disable sending credentials
+      })
+      console.log('response.data', response.data)
+      if (response.data && response.data.events) {
+        // // Convert event keys from camelCase to lowercase
+        // if (response.data.events.length > 0) {
+        //   response.data.events = response.data.events.map((event) => {
+        //     const lowercasedEvent = {}
+        //     for (const key in event) {
+        //       // Convert the first character to lowercase
+        //       const lowercaseKey = lowercaseFirstLetter(key)
+        //       lowercasedEvent[lowercaseKey] = event[key]
+        //     }
+        //     return lowercasedEvent
+        //   })
+        // }
+
+        console.log('formattedEvents', formatEvents(response.data.events, type))
+        const formattedEvents = formatEvents(response.data.events, type)
+        return {
+          events: formattedEvents,
+          lastBlock: response.data.events[response.data.events.length - 1].blockNumber
+        }
+      }
+      return undefined
+    } catch (err) {
+      console.log('Full error:', err)
+      console.log(`Error fetching events from indexer: ${err.message}`)
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error response data:', err.response.data)
+        console.error('Error response status:', err.response.status)
+        console.error('Error response headers:', err.response.headers)
+      }
+    }
+    return undefined
+  }
+
+  async getEventsFromBlockEventIndexer({ fromBlock, type }) {
+    try {
+      console.log('Getting events from block event indexer from block', fromBlock, 'type', type)
+      const url = `${this.baseUrl}/events/${this.netId}/${this.contract._address}/${type}?fromBlock=${fromBlock}`
+      const response = await axios.get(url)
+
+      if (response.data && response.data.events) {
+        const formattedEvents = formatEvents(response.data.events)
+        const lastBlock = response.data.lastBlock || formattedEvents[formattedEvents.length - 1].blockNumber
+
+        console.log('formattedEvents', formattedEvents)
+        console.log('lastBlock', lastBlock)
+
+        return {
+          events: formattedEvents,
+          lastBlock
+        }
+      }
+      return undefined
+    } catch (err) {
+      console.error(`Error fetching events from event indexer: ${err.message}`)
       return undefined
     }
   }

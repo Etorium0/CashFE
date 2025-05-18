@@ -10,8 +10,8 @@ import InstanceABI from '@/abis/Instance.abi.json'
 import TornadoProxyABI from '@/abis/TornadoProxy.abi.json'
 
 import { ACTION, ACTION_GAS } from '@/constants/variables'
-import { graph, treesInterface, EventsFactory } from '@/services'
-
+import { graph, EventsFactory } from '@/services'
+import axios from 'axios'
 import {
   randomBN,
   parseNote,
@@ -20,15 +20,11 @@ import {
   isEmptyArray,
   decimalPlaces,
   parseHexNote,
-  checkCommitments,
   buffPedersenHash
 } from '@/utils'
+import { generateWitness } from './generateWitness'
+import { download } from './snark'
 
-import { buildGroth16, download, getTornadoKeys } from './snark'
-
-let groth16
-
-const websnarkUtils = require('websnark/src/utils')
 const { toWei, numberToHex, toBN, isAddress } = require('web3-utils')
 
 const getStatisticStore = (acc, { tokens }) => {
@@ -265,17 +261,19 @@ const actions = {
     dispatch('updateSelectEvents')
   },
   async updateSelectEvents({ dispatch, commit, state, rootGetters, getters }) {
+    console.log('updateSelectEvents')
     const netId = rootGetters['metamask/netId']
     const { currency, amount } = state.selectedStatistic
 
     const eventService = getters.eventsInterface.getService({ netId, amount, currency })
 
+    // TODO: get events from indexer
     const graphEvents = await eventService.getEventsFromGraph({ methodName: 'getStatistic' })
-
     let statistic = graphEvents?.events
 
     if (!statistic || !statistic.length) {
-      const fresh = await eventService.getStatisticsRpc({ eventsCount: 10 })
+      const fresh = await eventService.getStatisticsRpc({ eventsCount: 10, type: eventsType.DEPOSIT })
+      console.log('fresh events', fresh)
 
       statistic = fresh || []
     }
@@ -731,47 +729,7 @@ const actions = {
       throw new Error(this.app.i18n.t('invalidRoot'))
     }
   },
-  async buildTree({ dispatch }, { currency, amount, netId, commitmentHex }) {
-    const treeInstanceName = `${currency}_${amount}`
-    const params = { netId, amount, currency }
-
-    const treeService = treesInterface.getService({
-      ...params,
-      commitment: commitmentHex,
-      instanceName: treeInstanceName
-    })
-
-    const [cachedTree, eventsData] = await Promise.all([
-      treeService.getTree(),
-      dispatch('updateEvents', { ...params, type: eventsType.DEPOSIT })
-    ])
-
-    const commitments = eventsData.events.map((el) => el.commitment.toString(10))
-
-    let tree = cachedTree
-    if (tree) {
-      const newLeaves = commitments.slice(tree.elements.length)
-      tree.bulkInsert(newLeaves)
-    } else {
-      console.log('events', eventsData)
-      checkCommitments(eventsData.events)
-      tree = treeService.createTree({ events: commitments })
-    }
-
-    const root = toFixedHex(tree.root)
-    await dispatch('checkRoot', { root, parsedNote: params })
-
-    await treeService.saveTree({ tree })
-
-    return { tree, root }
-  },
-  async createSnarkProof(
-    { rootGetters, rootState, state, getters },
-    { root, note, tree, recipient, leafIndex }
-  ) {
-    const { pathElements, pathIndices } = tree.path(leafIndex)
-    console.log('pathElements, pathIndices', pathElements, pathIndices)
-
+  async createSnarkProof({ rootGetters, rootState, state, getters }, { note, recipient, leaves }) {
     const nativeCurrency = rootGetters['metamask/nativeCurrency']
     const withdrawType = state.withdrawType
 
@@ -794,45 +752,56 @@ const actions = {
     const input = {
       // public
       fee,
-      root,
       refund,
       relayer,
       recipient: BigInt(recipient),
       nullifierHash: note.nullifierHash,
-      // private
-      pathIndices,
-      pathElements,
       secret: note.secret,
-      nullifier: note.nullifier
-    }
-
-    const { circuit, provingKey } = await getTornadoKeys()
-
-    if (!groth16) {
-      groth16 = await buildGroth16()
+      nullifier: note.nullifier,
+      leaves
     }
 
     console.log('Start generating SNARK proof', input)
     console.time('SNARK proof time')
-    const proofData = await websnarkUtils.genWitnessAndProve(groth16, input, circuit, provingKey)
-    const { proof } = websnarkUtils.toSolidityInput(proofData)
+    let proof
+    try {
+      console.log('generating witness')
+      console.log('nullifier', input.nullifier)
+      console.log('secret', input.secret)
+      console.log('recipient', input.recipient)
+      console.log('relayer', input.relayer)
+      console.log('fee', input.fee)
+      console.log('refund', input.refund)
+      proof = await generateWitness(
+        input.nullifier,
+        input.secret,
+        input.recipient,
+        input.relayer,
+        input.leaves,
+        input.fee,
+        input.refund
+      )
+    } catch (err) {
+      console.error('Error generating witness:', err)
+      throw new Error(`Failed to generate witness: ${err.message}`)
+    }
 
     const args = [
-      toFixedHex(input.root),
-      toFixedHex(input.nullifierHash),
+      proof.root,
+      proof.nullifierHash,
       toFixedHex(input.recipient, 20),
       toFixedHex(input.relayer, 20),
       toFixedHex(input.fee),
       toFixedHex(input.refund)
     ]
+
     return { args, proof }
   },
   async prepareWithdraw({ dispatch, getters, commit }, { note, recipient }) {
+    console.log('preparing withdraw')
     commit('REMOVE_PROOF', { note })
     try {
       const parsedNote = parseNote(note)
-
-      const { tree, root } = await dispatch('buildTree', parsedNote)
 
       const isSpent = await dispatch('checkSpentEventFromNullifier', parsedNote)
 
@@ -840,12 +809,31 @@ const actions = {
         throw new Error(this.app.i18n.t('noteHasBeenSpent'))
       }
 
+      const [, currency, amount, netId] = note.split('-')
+      const config = networkConfig[`netId${netId}`]
+      const instance = config.tokens[currency].instanceAddress[amount]
+
+      // TODO: add leaves
+      let leaves = []
+      const url = `${process.env.URL}/leaves/${netId}/${instance}`
+      console.log(`Getting leaves with hex ${parsedNote.nullifierHex} from indexer`, url)
+      const response = await axios.get(url, {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        withCredentials: false // Disable sending credentials
+      })
+      console.log('find leaves api response', response.data)
+      if (response.data && response.data.leaves) {
+        leaves = response.data.leaves
+      }
+      console.log('leaves', leaves)
+
       const { proof, args } = await dispatch('createSnarkProof', {
-        root,
-        tree,
         recipient,
         note: parsedNote,
-        leafIndex: tree.indexOf(parsedNote.commitmentHex)
+        leaves
       })
       console.timeEnd('SNARK proof time')
       commit('SAVE_PROOF', { proof, args, note })
@@ -864,12 +852,47 @@ const actions = {
       const contractInstance = getters.tornadoProxyContract({ netId })
 
       const instance = config.tokens[currency].instanceAddress[amount]
-      const params = [instance, proof, ...args]
+      const params = [instance, proof.pA, proof.pB, proof.pC, ...args]
+      console.log('params', params)
 
+      // Log the individual parameters
+      console.log('Debug withdraw parameters:')
+      console.log('_cyclone (instance):', instance)
+      console.log('_pA:', proof.pA)
+      console.log('_pB:', proof.pB)
+      console.log('_pC:', proof.pC)
+      console.log('_root:', proof.root)
+      console.log('_nullifierHash:', proof.nullifierHash)
+      console.log('remaining args:', args)
+      console.log('args[5]', args[5])
+      // Try logging the encoded data
       const data = contractInstance.methods.withdraw(...params).encodeABI()
-      const gas = await contractInstance.methods
-        .withdraw(...params)
-        .estimateGas({ from: ethAccount, value: args[5] })
+
+      // Simplify gas estimation with better error handling
+      console.log('Starting gas estimation...')
+      let gas
+      try {
+        // Wrap in Promise.resolve to ensure we can catch any synchronous errors too
+        gas = await Promise.resolve().then(() => {
+          return contractInstance.methods
+            .withdraw(...params)
+            .estimateGas({ from: ethAccount, value: args[5] })
+        })
+        console.log('Gas estimation successful:', gas)
+      } catch (err) {
+        console.error('Gas estimation failed with error:', err)
+        console.error('Error details:', {
+          message: err.message,
+          code: err.code,
+          reason: err.reason,
+          stack: err.stack
+        })
+
+        // Try with higher gas limit as fallback
+        console.log('Attempting fallback with fixed gas limit...')
+        gas = 500000
+        console.log('Using fallback gas value:', gas)
+      }
 
       const callParams = {
         method: 'eth_sendTransaction',
@@ -926,6 +949,7 @@ const actions = {
       nextDepositIndex
     })
   },
+
   async loadEvent({ getters, rootGetters }, { note, type, eventName, eventToFind }) {
     try {
       const eventService = getters.eventsInterface.getService(note)
@@ -940,6 +964,7 @@ const actions = {
   async loadDepositEvent({ state, dispatch }, { withdrawNote }) {
     try {
       const note = parseNote(withdrawNote)
+      console.log('note', note)
 
       const lastEvent = await dispatch('loadEvent', {
         note,
@@ -948,6 +973,8 @@ const actions = {
         methodName: 'getAllDeposits',
         eventToFind: note.commitmentHex
       })
+
+      console.log('lastEvent', lastEvent)
 
       if (lastEvent) {
         const { nextDepositIndex } = state.statistic[note.currency][note.amount]

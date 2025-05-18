@@ -52,14 +52,12 @@
     "nuxt-web3-provider": "0.1.4",
     "push-dir": "^0.4.1",
     "recursive-fs": "^2.1.0",
-    "snarkjs": "git+https://github.com/tornadocash/snarkjs.git#869181cfaf7526fe8972073d31655493a04326d5",
+    "snarkjs": "github:iden3/snarkjs#v0.7.5",
     "v-idle": "^0.2.0",
     "vue-clipboard2": "^0.3.1",
     "vue-i18n": "^8.15.4",
     "vue-server-renderer": "^2.7.16",
-    "vuex-persistedstate": "^2.7.0",
-    "web3": "1.5.2",
-    "websnark": "git+https://github.com/tornadocash/websnark.git#4c0af6a8b65aabea3c09f377f63c44e7a58afa6d"
+    "vuex-persistedstate": "^2.7.0"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^1.1.2",
