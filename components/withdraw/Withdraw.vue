@@ -306,10 +306,10 @@ export default {
           this.depositTimestamp = null
 
           if (!this.hasErrorNote) {
-            const [tornadoPrefix, currency, amount, noteNetId, note] = this.withdrawNote.split('-')
-            if (tornadoPrefix !== 'tornado') {
+            const [cyclonePrefix, currency, amount, noteNetId, note] = this.withdrawNote.split('-')
+            if (cyclonePrefix !== 'cyclone') {
               this.$store.dispatch('loading/disable')
-              this.withdrawNote = `tornado-${currency}-${amount}-${noteNetId}-${note}`
+              this.withdrawNote = `cyclone-${currency}-${amount}-${noteNetId}-${note}`
               return
             }
             this.getLogs(withdrawNote)

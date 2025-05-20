@@ -147,7 +147,7 @@ export default {
     },
     openDepositModal() {
       this.$store.dispatch('application/prepareDeposit', {
-        prefix: `tornado-${this.selectedToken}-${this.selectedAmount}-${this.netId}`
+        prefix: `cyclone-${this.selectedToken}-${this.selectedAmount}-${this.netId}`
       })
       const depositModal = this.$buefy.modal.open({
         parent: this,

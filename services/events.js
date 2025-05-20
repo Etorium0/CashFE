@@ -411,7 +411,7 @@ class EventService {
   async findEventFromIndexer({ eventName, eventToFind, type }) {}
 
   async getLatestEventsFromIndexer({ eventsCount, type }) {
-    const url = `${this.baseUrl}/events/${this.netId}/${this.contract._address}/${type}?limit=${eventsCount}`
+    const url = `${this.baseUrl}/events/${this.netId}/${this.contract._address}/${type}?limit=${eventsCount}&fromBlock=0&toBlock=0`
     console.log(`Getting ${eventsCount} events from indexer`, url)
     let response
     try {
@@ -424,19 +424,6 @@ class EventService {
       })
       console.log('response.data', response.data)
       if (response.data && response.data.events) {
-        // // Convert event keys from camelCase to lowercase
-        // if (response.data.events.length > 0) {
-        //   response.data.events = response.data.events.map((event) => {
-        //     const lowercasedEvent = {}
-        //     for (const key in event) {
-        //       // Convert the first character to lowercase
-        //       const lowercaseKey = lowercaseFirstLetter(key)
-        //       lowercasedEvent[lowercaseKey] = event[key]
-        //     }
-        //     return lowercasedEvent
-        //   })
-        // }
-
         console.log('formattedEvents', formatEvents(response.data.events, type))
         const formattedEvents = formatEvents(response.data.events, type)
         return {
