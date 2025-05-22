@@ -132,7 +132,7 @@
           :expanded="isLoading"
           :class="{ 'slide-animation-active': isLoading }"
           :disabled="isWithdrawalButtonDisable"
-          :loading="isLoadingRelayers || isLoading"
+          :loading="isLoading"
           data-test="button_start_withdraw"
           @click="onWithdraw"
         >

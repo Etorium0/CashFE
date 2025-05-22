@@ -187,7 +187,9 @@ export default {
       // Update the babel-loader configuration
       config.module.rules.push({
         test: /\.m?js$/,
-        include: [/node_modules\/snarkjs/, /node_modules\/@iden3/, /node_modules\/ffjavascript/],
+        include: [
+          /node_modules\/(snarkjs|@iden3|ffjavascript|r1csfile|circom_runtime|circomlibjs|fastfile)/
+        ],
         use: {
           loader: 'babel-loader',
           options: {
@@ -206,6 +208,12 @@ export default {
             ]
           }
         }
+      })
+      // Add rule to exclude large constants files
+      config.module.rules.push({
+        test: /poseidon_constants\.js$/,
+        use: 'file-loader',
+        type: 'javascript/auto'
       })
     },
     plugins: [
@@ -240,6 +248,18 @@ export default {
       layouts: false,
       pages: false,
       commons: false
+    },
+    transpile: [
+      'snarkjs',
+      '@iden3/binfileutils',
+      'ffjavascript',
+      /fastfile/,
+      /circomlibjs/,
+      'r1csfile',
+      'circom_runtime' // Add this line
+    ],
+    babel: {
+      compact: true // This reduces certain verbose messages
     }
   },
   buildModules: [
@@ -252,6 +272,7 @@ export default {
     ]
   ],
   env: {
+    ALCHEMY_RONIN_KEY: process.env.ALCHEMY_RONIN_KEY, // Ronin
     commit: getCurrentCommit()
   },
 
