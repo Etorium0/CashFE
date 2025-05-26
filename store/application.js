@@ -59,7 +59,8 @@ const state = () => {
     withdrawType: 'relayer',
     ethToReceive: '20000000000000000',
     defaultEthToReceive: '20000000000000000',
-    withdrawNote: ''
+    withdrawNote: '',
+    isKYC: false
   }
 }
 
@@ -100,6 +101,9 @@ const mutations = {
   },
   SET_WITHDRAW_NOTE(state, withdrawNote) {
     state.withdrawNote = withdrawNote
+  },
+  SET_KYC(state, value) { 
+    state.isKYC = value
   }
 }
 
@@ -252,7 +256,8 @@ const getters = {
   isArbitrumConnected: (state, getters, rootState, rootGetters) => {
     const netId = rootGetters['metamask/netId']
     return Number(netId) === 42161
-  }
+  },
+  isKYC: (state) => state.isKYC 
 }
 
 const actions = {

@@ -35,12 +35,11 @@
           :mobile-mode="null"
           @input="changeAmount"
         >
-          <template v-for="({ amount, address }, key) in amounts">
+          <template v-for="({ amount, address }, key) in amounts" :key="key">
             <b-step-item
-              :key="key"
               :label="shortenAmount(amount)"
               :clickable="address !== ''"
-              :header-class="`token-${selectedToken}-${amount}`"
+              :header-class="`token-${selectedToken}-${amount.toString().replace('.', '_')}`"
             ></b-step-item>
           </template>
         </b-steps>
@@ -52,6 +51,7 @@
       type="is-primary is-fullwidth"
       :loading="isDepositBtnClicked"
       data-test="button_deposit"
+      :disabled="!isKYC"
       @click="onDeposit"
     >
       {{ $t('depositButton') }}
@@ -83,7 +83,7 @@ export default {
   computed: {
     ...mapGetters('token', ['isSufficientAllowance', 'isSufficientBalance']),
     ...mapGetters('metamask', ['networkConfig', 'netId', 'isLoggedIn', 'nativeCurrency']),
-    ...mapGetters('application', ['selectedCurrency']),
+    ...mapGetters('application', ['selectedCurrency', 'isKYC']),
     selectedAmount: {
       get() {
         return this.$store.state.application.selectedInstance.amount
@@ -162,6 +162,14 @@ export default {
       })
     },
     async onDeposit() {
+      // Kiểm tra KYC trước khi cho phép deposit
+      if (!this.isKYC) {
+        this.$buefy.toast.open({
+          message: 'Bạn cần hoàn thành KYC để sử dụng chức năng này.',
+          type: 'is-danger'
+        })
+        return
+      }
       const onApproval = () => {
         if (this.isSufficientAllowance) {
           if (!this.isDepositModalOpened) {
