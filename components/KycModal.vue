@@ -122,6 +122,14 @@ export default {
         // 7. Close modal
         this.visible = false
         this.loading = false
+
+        // New code block starts here
+        const wallet = this.walletAddress.toLowerCase()
+        const kycMap = JSON.parse(localStorage.getItem('kycMap') || '{}')
+        kycMap[wallet] = true
+        localStorage.setItem('kycMap', JSON.stringify(kycMap))
+        this.$store.commit('application/SET_KYC', true)
+        // New code block ends here
       } catch (error) {
         console.error('KYC submission error:', error)
         this.$buefy.toast.open({
@@ -143,6 +151,10 @@ export default {
           .toString(36)
           .substring(2, 15)
       )
+    },
+
+    onKycSubmitted(kycVerification) {
+      this.$store.commit('application/SET_KYC', true)
     }
   }
 }

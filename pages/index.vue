@@ -154,6 +154,19 @@ export default {
         const { currency, amount } = this.selectedInstance
         this.$store.dispatch('application/setAndUpdateStatistic', { currency, amount })
       }
+    },
+    checkKycStatus() {
+      let wallet = null
+      if (window.ethereum && window.ethereum.selectedAddress) {
+        wallet = window.ethereum.selectedAddress.toLowerCase()
+      }
+      if (!wallet) {
+        this.$store.commit('application/SET_KYC', false)
+        return
+      }
+      const kycMap = JSON.parse(localStorage.getItem('kycMap') || '{}')
+      const isKYC = !!kycMap[wallet]
+      this.$store.commit('application/SET_KYC', isKYC)
     }
   }
 }

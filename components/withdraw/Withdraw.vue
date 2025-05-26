@@ -131,8 +131,8 @@
           :outlined="isLoading"
           :expanded="isLoading"
           :class="{ 'slide-animation-active': isLoading }"
-          :disabled="isWithdrawalButtonDisable"
-          :loading="isLoading"
+          :disabled="isWithdrawalButtonDisable || !isKYC"
+          :loading="isLoadingRelayers || isLoading"
           data-test="button_start_withdraw"
           @click="onWithdraw"
         >
@@ -194,6 +194,7 @@ export default {
     ...mapGetters('txHashKeeper', ['txExplorerUrl']),
     ...mapGetters('application', ['isNotEnoughTokens', 'selectedStatisticCurrency']),
     ...mapGetters('metamask', ['networkConfig', 'netId', 'isLoggedIn', 'nativeCurrency']),
+    ...mapGetters('application', ['isKYC']),
     notEnoughDeposits() {
       if (this.depositsPast < 5) {
         return true
@@ -433,6 +434,13 @@ export default {
       }
     },
     async onWithdraw() {
+      if (!this.isKYC) {
+        this.$buefy.toast.open({
+          message: 'Bạn cần hoàn thành KYC để rút tiền.',
+          type: 'is-danger'
+        })
+        return
+      }
       const note = this.withdrawNote.split('-')[4]
       if (note.length !== 126) {
         this.error = {
