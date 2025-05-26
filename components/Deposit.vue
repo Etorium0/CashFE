@@ -35,13 +35,13 @@
           :mobile-mode="null"
           @input="changeAmount"
         >
-          <template v-for="({ amount, address }, key) in amounts" :key="key">
-            <b-step-item
-              :label="shortenAmount(amount)"
-              :clickable="address !== ''"
-              :header-class="`token-${selectedToken}-${amount.toString().replace('.', '_')}`"
-            ></b-step-item>
-          </template>
+          <b-step-item
+            v-for="({ amount, address }, key) in amounts"
+            :key="key"
+            :label="shortenAmount(amount)"
+            :clickable="address !== ''"
+            :header-class="`token-${selectedToken}-${amount.toString().replace('.', '_')}`"
+          />
         </b-steps>
       </b-field>
     </fieldset>
@@ -58,6 +58,7 @@
     </b-button>
   </b-tab-item>
 </template>
+
 <script>
 /* eslint-disable no-console */
 import { mapGetters } from 'vuex'

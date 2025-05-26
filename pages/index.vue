@@ -164,7 +164,7 @@ export default {
         this.$store.commit('application/SET_KYC', false)
         return
       }
-      let kycMap = JSON.parse(localStorage.getItem('kycMap') || '{}')
+      const kycMap = JSON.parse(localStorage.getItem('kycMap') || '{}')
       const isKYC = !!kycMap[wallet]
       this.$store.commit('application/SET_KYC', isKYC)
     }
