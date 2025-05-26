@@ -125,7 +125,7 @@ export default {
 
         // New code block starts here
         const wallet = this.walletAddress.toLowerCase()
-        let kycMap = JSON.parse(localStorage.getItem('kycMap') || '{}')
+        const kycMap = JSON.parse(localStorage.getItem('kycMap') || '{}')
         kycMap[wallet] = true
         localStorage.setItem('kycMap', JSON.stringify(kycMap))
         this.$store.commit('application/SET_KYC', true)

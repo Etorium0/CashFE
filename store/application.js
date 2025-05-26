@@ -102,7 +102,7 @@ const mutations = {
   SET_WITHDRAW_NOTE(state, withdrawNote) {
     state.withdrawNote = withdrawNote
   },
-  SET_KYC(state, value) { 
+  SET_KYC(state, value) {
     state.isKYC = value
   }
 }
@@ -257,7 +257,7 @@ const getters = {
     const netId = rootGetters['metamask/netId']
     return Number(netId) === 42161
   },
-  isKYC: (state) => state.isKYC 
+  isKYC: (state) => state.isKYC
 }
 
 const actions = {
