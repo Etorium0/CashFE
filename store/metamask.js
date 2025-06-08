@@ -6,6 +6,7 @@ import { SnackbarProgrammatic as Snackbar, DialogProgrammatic as Dialog } from '
 import { PROVIDERS } from '@/constants'
 import networkConfig from '@/networkConfig'
 import { walletConnectConnector } from '@/services'
+import { checkStatusKYC } from '@/services/cycloneApi'
 
 import SanctionsListAbi from '@/abis/SanctionsList.abi'
 
@@ -268,6 +269,17 @@ const actions = {
       const account = toChecksumAddress(newAccount)
       commit('IDENTIFY', account)
       await dispatch('updateAccountBalance')
+
+      // Check KYC status for new account
+      try {
+        console.log('🔍 Checking KYC status for account:', account)
+        const status = await checkStatusKYC(account)
+        console.log('KYC status:', status)
+        commit('application/SET_KYC', !!(status && status.is_active), { root: true })
+      } catch (error) {
+        console.warn('Could not check KYC status:', error.message)
+        commit('application/SET_KYC', false, { root: true })
+      }
     } else {
       await dispatch('onLogOut')
     }
@@ -437,6 +449,17 @@ const actions = {
       this.$provider.initWeb3(url)
 
       await dispatch('updateAccountBalance', address)
+
+      // Check KYC status for connected wallet
+      try {
+        console.log('🔍 Checking KYC status for connected wallet:', address)
+        const status = await checkStatusKYC(address)
+        console.log('KYC status:', status)
+        commit('application/SET_KYC', !!(status && status.is_active), { root: true })
+      } catch (error) {
+        console.warn('Could not check KYC status:', error.message)
+        commit('application/SET_KYC', false, { root: true })
+      }
 
       if (getters.isWalletConnect) {
         if (provider.wc.peerMeta) {
