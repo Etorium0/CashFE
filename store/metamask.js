@@ -278,7 +278,15 @@ const actions = {
         commit('application/SET_KYC', !!(status && status.is_active), { root: true })
       } catch (error) {
         console.warn('Could not check KYC status:', error.message)
-        commit('application/SET_KYC', false, { root: true })
+        // Check if this is a 404 error (user not found in KYC database)
+        if (error.response && error.response.status === 404) {
+          console.log('User not found in KYC database - setting KYC status to false')
+          commit('application/SET_KYC', false, { root: true })
+        } else {
+          // For other errors, still set to false but log more details
+          console.error('KYC check error details:', error)
+          commit('application/SET_KYC', false, { root: true })
+        }
       }
     } else {
       await dispatch('onLogOut')
