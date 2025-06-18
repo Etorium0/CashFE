@@ -6,7 +6,7 @@ import { SnackbarProgrammatic as Snackbar, DialogProgrammatic as Dialog } from '
 import { PROVIDERS } from '@/constants'
 import networkConfig from '@/networkConfig'
 import { walletConnectConnector } from '@/services'
-import { checkStatusKYC } from '@/services/cycloneApi'
+import { checkKYCStatus } from '@/services/cycloneApi'
 
 import SanctionsListAbi from '@/abis/SanctionsList.abi'
 
@@ -273,17 +273,28 @@ const actions = {
       // Check KYC status for new account
       try {
         console.log('🔍 Checking KYC status for account:', account)
-        const status = await checkStatusKYC(account)
+
+        const web3Provider = this.$provider?.provider
+        const netId = this.netId
+
+        const status = await checkKYCStatus(account, web3Provider, netId)
         console.log('KYC status:', status)
+
         commit('application/SET_KYC', !!(status && status.is_active), { root: true })
+
+        if (status.source === 'smart_contract') {
+          console.log('✅ KYC verified via smart contract using isKYC() function')
+        } else if (status.source === 'localStorage') {
+          console.log('⚠️ KYC status from localStorage (blockchain unavailable)')
+        } else {
+          console.log('❌ KYC check failed')
+        }
       } catch (error) {
         console.warn('Could not check KYC status:', error.message)
-        // Check if this is a 404 error (user not found in KYC database)
         if (error.response && error.response.status === 404) {
           console.log('User not found in KYC database - setting KYC status to false')
           commit('application/SET_KYC', false, { root: true })
         } else {
-          // For other errors, still set to false but log more details
           console.error('KYC check error details:', error)
           commit('application/SET_KYC', false, { root: true })
         }
@@ -461,9 +472,22 @@ const actions = {
       // Check KYC status for connected wallet
       try {
         console.log('🔍 Checking KYC status for connected wallet:', address)
-        const status = await checkStatusKYC(address)
+
+        const web3Provider = this.$provider?.provider
+        const netId = this.netId
+
+        const status = await checkKYCStatus(address, web3Provider, netId)
         console.log('KYC status:', status)
+
         commit('application/SET_KYC', !!(status && status.is_active), { root: true })
+
+        if (status.source === 'smart_contract') {
+          console.log('✅ KYC verified via smart contract using isKYC() function')
+        } else if (status.source === 'localStorage') {
+          console.log('⚠️ KYC status from localStorage (blockchain unavailable)')
+        } else {
+          console.log('❌ KYC check failed')
+        }
       } catch (error) {
         console.warn('Could not check KYC status:', error.message)
         commit('application/SET_KYC', false, { root: true })
@@ -621,6 +645,17 @@ const actions = {
           decimals: 18
         },
         blockExplorerUrls: ['https://snowtrace.io']
+      },
+      2021: {
+        chainId: '0x7E5',
+        chainName: 'Ronin Saigon Testnet',
+        rpcUrls: ['https://saigon-rpc.roninchain.com'],
+        nativeCurrency: {
+          name: 'RON',
+          symbol: 'RON',
+          decimals: 18
+        },
+        blockExplorerUrls: ['https://saigon-app.roninchain.com']
       }
     }
 

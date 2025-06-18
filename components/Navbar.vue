@@ -41,8 +41,9 @@
             icon-left="check"
             :type="isKYC ? 'is-success' : 'is-primary'"
             :outlined="!isKYC"
-            @click="resetKycModal"
             class="kyc-button"
+            @click="resetKycModal"
+            :disabled="isKYC"
           >
             {{ isKYC ? 'KYC verified' : 'KYC' }}
           </b-button>
@@ -121,12 +122,9 @@ export default {
       })
     },
     resetKycModal() {
-      // Đặt lại hoàn toàn trạng thái modal
+      if (this.isKYC) return
       this.showKyc = false
-
-      // Đợi một tick để Vue cập nhật DOM
       this.$nextTick(() => {
-        // Sau đó mới hiển thị modal
         this.showKyc = true
         console.log('KYC modal reset and shown again')
       })

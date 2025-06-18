@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import { submitKYC, checkStatusKYC } from '@/services/cycloneApi'
+import { submitKYC, checkKYCStatus } from '@/services/cycloneApi'
 
 export default {
   props: {
@@ -137,50 +137,55 @@ export default {
         console.log('Formatted date:', this.formatDate(this.form.dateOfBirth))
         console.log('Final KYC Verification data to be submitted:', JSON.stringify(kycVerification, null, 2))
 
-        // Submit KYC data
+        // Submit KYC data to backend API (to mint NFT and save on blockchain)
         console.log('Calling submitKYC API...')
         try {
           const response = await submitKYC(kycVerification)
           console.log('KYC submission response:', response)
 
-          // 6. Emit the complete verification data
           this.$emit('kyc-submitted', kycVerification)
 
-          // 7. Show success message
           this.$buefy.toast.open({
             message: 'KYC data successfully submitted and verified!',
             type: 'is-success'
           })
 
-          // 8. Update local storage and store
+          // Update local storage and store
           const wallet = this.walletAddress.toLowerCase()
           const kycMap = JSON.parse(localStorage.getItem('kycMap') || '{}')
           kycMap[wallet] = true
           localStorage.setItem('kycMap', JSON.stringify(kycMap))
 
-          // Kiểm tra lại trạng thái KYC từ backend (theo wallet address) và cập nhật vào store
-          console.log('Checking KYC status for wallet:', this.walletAddress)
-          console.log('Wallet address length:', this.walletAddress.length)
-          console.log('Wallet address (trimmed):', this.walletAddress.trim())
+          // Check KYC status from smart contract
+          console.log('Checking KYC status from smart contract for wallet:', this.walletAddress)
 
           try {
-            const status = await checkStatusKYC(this.walletAddress.trim())
-            console.log('KYC status from backend:', status)
-            console.log('Setting isKYC to:', !!(status && status.is_active))
+            const web3Provider = this.$store.state.metamask?.providerConfig?.provider || window.ethereum
+            const netId = this.$store.getters['metamask/netId']
 
-            // Commit mutation với namespace application (đúng cho Nuxt store modules)
+            const status = await checkKYCStatus(this.walletAddress.trim(), web3Provider, netId)
+            console.log('KYC status from smart contract:', status)
+
             this.$store.commit('application/SET_KYC', !!(status && status.is_active))
             console.log('isKYC committed to store:', !!(status && status.is_active))
-            console.log('isKYC in store after commit:', this.$store.getters['application/isKYC'])
-            console.log('Store state application:', this.$store.state.application.isKYC)
+
+            if (status.source === 'smart_contract') {
+              console.log('✅ KYC verified via smart contract using isKYC() function')
+            } else if (status.source === 'localStorage') {
+              console.log('⚠️ KYC status from localStorage (blockchain unavailable)')
+            } else {
+              console.log('❌ KYC check failed')
+            }
           } catch (checkError) {
-            console.warn('Cannot check KYC status from backend (API may be down):', checkError.message)
-            // Fallback: Assume KYC is active after successful submission
+            console.warn(
+              'Cannot check KYC status from smart contract (may be unavailable):',
+              checkError.message
+            )
             this.$store.commit('application/SET_KYC', true)
-            console.log('Fallback: Set isKYC to true after successful submission')
+            console.log('Fallback: Using localStorage KYC status')
           }
 
-          // 9. Close modal
+          // Close modal
           this.visible = false
           this.loading = false
         } catch (error) {
