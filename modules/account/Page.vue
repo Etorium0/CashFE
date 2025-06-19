@@ -4,7 +4,7 @@
     <NoteAccount />
 
     <!-- KYC Section -->
-    <div class="kyc-section">
+    <!-- <div class="kyc-section">
       <h3 class="title is-4">KYC Verification</h3>
       <KycModal v-if="!isKYC" :visible.sync="showKyc" @kyc-submitted="onKycSubmitted" />
 
@@ -13,26 +13,26 @@
           <b-icon icon="account-check" size="is-small"></b-icon>
           <span>{{ isKYC ? 'KYC Verified' : 'Complete KYC' }}</span>
         </b-button>
-      </div>
+      </div> -->
 
-      <!-- KYC Details Component -->
-      <KYCDetails v-if="ethAccount" :wallet-address="ethAccount" @kyc-updated="onKYCUpdated" />
-    </div>
+    <!-- KYC Details Component -->
+    <!-- <KYCDetails v-if="ethAccount" :wallet-address="ethAccount" @kyc-updated="onKYCUpdated" />
+    </div> -->
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
 import { Settings, NoteAccount } from './components'
-import KycModal from '@/components/KycModal.vue'
-import KYCDetails from '@/components/KYCDetails.vue'
+// import KycModal from '@/components/KycModal.vue'
+// import KYCDetails from '@/components/KYCDetails.vue'
 
 export default {
   components: {
     Settings,
-    NoteAccount,
-    KycModal,
-    KYCDetails
+    NoteAccount
+    // KycModal
+    // KYCDetails
   },
   data() {
     return {
