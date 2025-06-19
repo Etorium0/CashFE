@@ -1,6 +1,6 @@
 <template>
   <img
-    :src="require('@/assets/img/icons/logo.svg')"
+    :src="require('@/assets/img/icons/logo1.png')"
     alt="Logo"
     class="logo"
     :style="{ width: width, height: height }"
@@ -12,7 +12,7 @@ export default {
   props: {
     width: {
       type: String,
-      default: '120px'
+      default: '110px'
     },
     height: {
       type: String,

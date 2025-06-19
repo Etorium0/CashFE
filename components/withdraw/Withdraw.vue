@@ -132,7 +132,7 @@
           :expanded="isLoading"
           :class="{ 'slide-animation-active': isLoading }"
           :disabled="isWithdrawalButtonDisable || !isKYC"
-          :loading="isLoadingRelayers || isLoading"
+          :loading="isLoading"
           data-test="button_start_withdraw"
           @click="onWithdraw"
         >
@@ -249,7 +249,7 @@ export default {
         this.isLoading ||
         !!this.error.type ||
         this.hasErrorNote ||
-        (this.withdrawType === 'relayer' && !this.selectedRelayer) ||
+        // (this.withdrawType === 'relayer' && !this.selectedRelayer) ||
         !this.isValidAddress
       )
     },

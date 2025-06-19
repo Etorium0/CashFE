@@ -37,8 +37,15 @@
           <metamask-navbar-icon data-test="metamask_connection_state" />
           <indicator data-test="note_account_connection_state" />
           <!-- Nút KYC mới -->
-          <b-button icon-left="user" type="is-primary" outlined @click="showKyc = true">
-            KYC
+          <b-button
+            icon-left="check"
+            :type="isKYC ? 'is-success' : 'is-primary'"
+            :outlined="!isKYC"
+            class="kyc-button"
+            @click="resetKycModal"
+            :disabled="isKYC"
+          >
+            {{ isKYC ? 'KYC verified' : 'KYC' }}
           </b-button>
           <!-- Nút Settings giữ nguyên -->
           <b-button
@@ -84,7 +91,15 @@ export default {
   computed: {
     ...mapGetters('metamask', ['netId', 'isLoggedIn']),
     ...mapGetters('governance/gov', ['isEnabledGovernance']),
+    ...mapGetters('application', ['isKYC']),
     ...mapState('governance/gov', ['hasActiveProposals'])
+  },
+  watch: {
+    isKYC: {
+      handler(newValue) {
+        console.log('KYC status changed:', newValue)
+      }
+    }
   },
   methods: {
     onAccount() {
@@ -94,6 +109,25 @@ export default {
       this.$buefy.toast.open({ message: 'KYC submitted and signed!', type: 'is-success' })
       // Xử lý dữ liệu KYC tại đây nếu cần
       console.log('KYC data:', data)
+      console.log('KYC status after submission:', this.isKYC)
+    },
+    openKycModal() {
+      console.log('Opening KYC modal. Current state:', this.showKyc)
+      this.showKyc = true
+      console.log('After setting showKyc = true:', this.showKyc)
+
+      // Debug - kiểm tra KycModal
+      this.$nextTick(() => {
+        console.log('Modal visible after nextTick:', this.showKyc)
+      })
+    },
+    resetKycModal() {
+      if (this.isKYC) return
+      this.showKyc = false
+      this.$nextTick(() => {
+        this.showKyc = true
+        console.log('KYC modal reset and shown again')
+      })
     }
   }
 }
